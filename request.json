@@ -1,0 +1,47 @@
+{
+  "version": 1,
+  "id": "26386ccc-d610-4908-8379-15408819b86a",
+  "repository": "rhkim00/calc-symlink-tig-20261026-0414-26386c",
+  "sourceCommit": "d8934002b256f93ab7589e41e6b66b216c1e36d7",
+  "request": {
+    "title": "Fix add() in src/calc.js to add instead of subtract",
+    "requestCategory": "bug",
+    "scope": "Project: calc-symlink (git branch main, HEAD d893400 \"calc with a symlink\", no uncommitted changes).\n\nThe bug: src/calc.js line 2 defines `export function add(a, b) { return a - b; }`. It subtracts, so the test `add adds` in test/calc.test.js (`assert.equal(add(2, 3), 5)`) fails.\n\nChange: edit src/calc.js so add returns `a + b`. Keep the function signature and export name unchanged.\n\nSide effect to leave alone: `average(values)` in the same file (lines 5-9) sums values by calling `add(sum, v)`. Fixing add fixes average as well. Its existing test `average of three numbers` (`average([1, 2, 3])` equals 2) should then pass without editing average.\n\nExpected end state: `npm test` (node --test) runs both tests in test/calc.test.js and both pass.\n\nFiles found: src/calc.js (the bug), test/calc.test.js (tests, not to be edited), package.json (`\"type\": \"module\"`, `\"test\": \"node --test\"`), README.md (one-line description, no change needed), pkg-link.json (reads identically to package.json; likely a symlink to it, given the commit title \"calc with a symlink\". Assumption: it is a symlink. Not verified with a shell because only reads were allowed).\n\nAssumption: the requester's wording \"Fix add() ... so it adds\" means the intended behaviour is ordinary numeric addition of a and b, as the test expects.",
+    "acceptanceChecks": [
+      "src/calc.js contains `export function add(a, b)` whose body returns `a + b`, and no subtraction remains in add().",
+      "`export function average` in src/calc.js is unchanged from the original (still loops with `sum = add(sum, v)` and divides by values.length).",
+      "`npm test` exits with code 0 and its output shows both tests `add adds` and `average of three numbers` as passing, with 0 failures.",
+      "`git diff --stat` shows only src/calc.js changed (test/, package.json, README.md, and pkg-link.json untouched).",
+      "pkg-link.json still points to the same target as before (if it is a symlink, `ls -l pkg-link.json` shows the same link target as at commit d893400)."
+    ],
+    "aiRequirement": {
+      "provider": "claude",
+      "model": "claude-haiku-5-5",
+      "effort": "low",
+      "source": "declared"
+    },
+    "rewardTig": "0",
+    "rewardMultiplier": "1",
+    "executionDeadlineAt": "2026-10-27T04:14:51.746Z",
+    "originalRequest": "Fix add() in src/calc.js so it adds, make npm test pass",
+    "context": "Project folder: calc-symlink. Git: branch main at d893400; 0 changed and 0 new file(s) not yet committed. Tracked files: 5. Top level: README.md, package.json, pkg-link.json, src, test.",
+    "completedWork": "Recent commits: \"calc with a symlink\".",
+    "constraints": [
+      "Change only the body of add() in src/calc.js. Do not change average(), the exports, or the function signature.",
+      "Do not edit test/calc.test.js or change the expected values in the tests.",
+      "Do not edit package.json, README.md, or pkg-link.json. Do not replace, delete, or re-create the symlink pkg-link.json if it is one.",
+      "Do not add new dependencies, scripts, or files.",
+      "Do not add extra validation or type coercion to add() beyond the request."
+    ],
+    "setupSteps": [
+      "Run `npm install` in the project folder (tig detected this). package.json declares no dependencies and there is no lockfile, so this is expected to finish quickly and do nothing. Assumption: no install is needed, and this step is optional.",
+      "Requires Node.js 18 or later, because `node --test` is the built-in test runner. Assumption: the worker's Node version meets this; check with `node --version`."
+    ],
+    "testSteps": [
+      "Run `npm test` in the project folder. Expected: node's test runner reports the two tests in test/calc.test.js as passing and exits with code 0.",
+      "Run `git diff` and confirm the only change is the `add` body in src/calc.js (`a - b` becomes `a + b`).",
+      "Optionally run `ls -l pkg-link.json` and confirm it is still a symlink with the same target as before the change."
+    ]
+  },
+  "layout": "tree"
+}
